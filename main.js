@@ -31,5 +31,33 @@ class BlockChain{
     newBlock.previousHash = this.getLatestBlock().hash;
     //anytime properties of block contructor changed, hash needs to be recalculated
     newBlock.hash = newBlock.calculateHash();
+    this.chain.push(newBlock);
   }
+
+  isChainValid() {
+    for(let i = 1; i < this.chain.length; i++) {
+      const currentBlock = this.chain[i];
+      const previousBlock = this.chain[i - 1];
+
+      if (currentBlock.hash !== currentBlock.calculateHash()) {
+        return false;
+      }
+
+      if (currentBlock.previousHash !== previousBlock.hash) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
 }
+
+let fkcoin = new BlockChain();
+fkcoin.addBlock(new Block(1, "01/01/2019", {amt: 4}));
+fkcoin.addBlock(new Block(2, "01/01/2019", {amt: 10}));
+
+// console.log(JSON.stringify(fkcoin, null, 4));
+
+fkcoin.chain[1].data = { amt: 100};
+console.log('Is chain valid? ' + fkcoin.isChainValid());
