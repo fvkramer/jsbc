@@ -7,16 +7,27 @@ class Block {
     this.data = data;
     this.previousHash = previousHash;
     this.hash = this.calculateHash();
+    this.nonce = 0;
   }
 
   calculateHash() {
-    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
+  }
+
+  mineBlock(difficulty) {
+    while(this.hash.substring(0, difficulty) !== Array(difficulty+1).join('0')) {
+      this.nonce++;
+      this.hash = this.calculateHash();
+    }
+
+    console.log("Block mined: " + this.hash);
   }
 }
 
 class BlockChain{
   constructor() {
     this.chain = [this.createGenesisBlock()];  //first block on blockchain is genesis block
+    this.difficulty = 3;
   }
 
   createGenesisBlock() {
@@ -30,7 +41,7 @@ class BlockChain{
   addBlock(newBlock) {
     newBlock.previousHash = this.getLatestBlock().hash;
     //anytime properties of block contructor changed, hash needs to be recalculated
-    newBlock.hash = newBlock.calculateHash();
+    newBlock.mineBlock(this.difficulty)
     this.chain.push(newBlock);
   }
 
@@ -54,10 +65,9 @@ class BlockChain{
 }
 
 let fkcoin = new BlockChain();
+
+console.log("Mining block 1...");
 fkcoin.addBlock(new Block(1, "01/01/2019", {amt: 4}));
+
+console.log("Mining block 2...");
 fkcoin.addBlock(new Block(2, "01/01/2019", {amt: 10}));
-
-// console.log(JSON.stringify(fkcoin, null, 4));
-
-fkcoin.chain[1].data = { amt: 100};
-console.log('Is chain valid? ' + fkcoin.isChainValid());
